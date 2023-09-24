@@ -16,6 +16,8 @@ class MessageAdapter(private val MessageList:ArrayList<Message>, private val lis
     private lateinit var storageReference: StorageReference
     private lateinit var recyclerView : RecyclerView
 
+    //this code defines an adapter (MessageAdapter) for a RecyclerView used to display a list of messages in a chat interface. It handles the creation of ViewHolders, binding data to them, and provides a mechanism for handling item click events. Additionally,
+    // it appears to be integrated with Firebase for data storage and retrieval, but the details of how Firebase is used are not provided in this code snippet.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.message_element,parent,false)
         return ChatViewHolder(itemView)

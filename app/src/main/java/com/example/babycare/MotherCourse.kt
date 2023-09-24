@@ -14,11 +14,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
 class MotherCourse : AppCompatActivity() {
-    private lateinit var binding:ActivityMotherCourseBinding
-    private lateinit var user:FirebaseAuth
+    private lateinit var binding: ActivityMotherCourseBinding
+    private lateinit var user: FirebaseAuth
 
-    private lateinit var courseArrayList : ArrayList<MotherCourseItem>
-    private lateinit var courseRecyclerView : RecyclerView
+    private lateinit var courseArrayList: ArrayList<MotherCourseItem>
+    private lateinit var courseRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMotherCourseBinding.inflate(layoutInflater)
@@ -26,41 +26,54 @@ class MotherCourse : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Get the pregnancyId from the intent
         var pregnancyId = intent.getStringExtra("pregnancyId")
 
         courseRecyclerView = binding.courseList
         courseRecyclerView.layoutManager = LinearLayoutManager(this)
         courseRecyclerView.setHasFixedSize(true)
         courseArrayList = arrayListOf<MotherCourseItem>()
-        readData(pregnancyId.toString())
 
+        // Call the method to read data from Firebase
+        readData(pregnancyId.toString())
     }
 
-    private fun readData(pregnancyId:String){
+    private fun readData(pregnancyId: String) {
         binding.courseList.visibility = View.GONE
         binding.loaderLayout.visibility = View.VISIBLE
+
+        // Clear the list before populating with data
+        courseArrayList.clear()
+
+        // Read data from the Firebase database
         FirebaseDatabase.getInstance().getReference("MotherCourse").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    for(fineSnapshot in snapshot.children){
-                        if(fineSnapshot.child("pregnancyId").value.toString() == pregnancyId){
-                            val courseItem =  fineSnapshot.getValue(MotherCourseItem::class.java)
+                if (snapshot.exists()) {
+                    for (fineSnapshot in snapshot.children) {
+                        if (fineSnapshot.child("pregnancyId").value.toString() == pregnancyId) {
+                            // Get the course item from the database and add it to the list
+                            val courseItem = fineSnapshot.getValue(MotherCourseItem::class.java)
                             courseArrayList.add(courseItem!!)
                         }
                     }
-                    courseRecyclerView.adapter = MotherCourseAdapter(courseArrayList,this@MotherCourse)
+
+                    // Set the adapter for the RecyclerView
+                    courseRecyclerView.adapter = MotherCourseAdapter(courseArrayList, this@MotherCourse)
+
+                    // Update the visibility of views
                     binding.courseList.visibility = View.VISIBLE
                     binding.loaderLayout.visibility = View.GONE
                 }
             }
-            override fun onCancelled(error: DatabaseError) {
 
+            override fun onCancelled(error: DatabaseError) {
+                // Handle any errors in data retrieval here
             }
         })
     }
 
     fun onItemClick(position: Int) {
-
+        // Handle item click events if needed
     }
 }

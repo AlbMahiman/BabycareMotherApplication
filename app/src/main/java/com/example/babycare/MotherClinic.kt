@@ -16,11 +16,11 @@ import com.google.firebase.database.ValueEventListener
 
 class MotherClinic : AppCompatActivity() {
 
-    private lateinit var binding:ActivityMotherClinicBinding
-    private lateinit var user:FirebaseAuth
+    private lateinit var binding: ActivityMotherClinicBinding
+    private lateinit var user: FirebaseAuth
 
-    private lateinit var clinicArrayList : ArrayList<MotherClinicItem>
-    private lateinit var clinicRecyclerView : RecyclerView
+    private lateinit var clinicArrayList: ArrayList<MotherClinicItem>
+    private lateinit var clinicRecyclerView: RecyclerView
 
     private var pregnancyIndex = ""
 
@@ -30,15 +30,17 @@ class MotherClinic : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Get the pregnancy ID passed from the previous activity
         var pregnancyId = intent.getStringExtra("pregnancyId")
         pregnancyIndex = pregnancyId.toString()
 
-        binding.btnUpComing.setOnClickListener{
-            var intent = Intent(this,MotherUpcomingClinic::class.java).also {
-                it.putExtra("pregnancyId",pregnancyId.toString())
+        // Button click listener to navigate to the upcoming clinic activity
+        binding.btnUpComing.setOnClickListener {
+            var intent = Intent(this, MotherUpcomingClinic::class.java).also {
+                it.putExtra("pregnancyId", pregnancyId.toString())
             }
             startActivity(intent)
-            overridePendingTransition(R.anim.so_slide,R.anim.so_slide)
+            overridePendingTransition(R.anim.so_slide, R.anim.so_slide)
             finish()
         }
 
@@ -47,43 +49,50 @@ class MotherClinic : AppCompatActivity() {
         clinicRecyclerView.setHasFixedSize(true)
         clinicArrayList = arrayListOf<MotherClinicItem>()
 
+        // Read data for completed clinics
         readData(pregnancyId.toString())
     }
 
-    private fun readData(pregnancyId:String){
+    private fun readData(pregnancyId: String) {
         binding.clinicList.visibility = View.GONE
         binding.loaderLayout.visibility = View.VISIBLE
 
         clinicArrayList.clear()
 
+        // Query the "MotherClinic" node in the Firebase database
         FirebaseDatabase.getInstance().getReference("MotherClinic").addValueEventListener(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    for(fineSnapshot in snapshot.children){
-                        if(fineSnapshot.child("pregnancyId").value.toString() == pregnancyId){
-                            val clinicItem =  fineSnapshot.getValue(MotherClinicItem::class.java)
-                            if (clinicItem != null) {
-                                if(clinicItem.status.toString() == "completed"){
-                                    clinicArrayList.add(clinicItem!!)
-                                }
+                if (snapshot.exists()) {
+                    // Iterate through the children of the "MotherClinic" node
+                    for (fineSnapshot in snapshot.children) {
+                        if (fineSnapshot.child("pregnancyId").value.toString() == pregnancyId) {
+                            // Deserialize the clinic item and add it to the list if it's completed
+                            val clinicItem = fineSnapshot.getValue(MotherClinicItem::class.java)
+                            if (clinicItem != null && clinicItem.status.toString() == "completed") {
+                                clinicArrayList.add(clinicItem!!)
                             }
                         }
                     }
-                    clinicRecyclerView.adapter = MotherClinicAdapter(clinicArrayList,this@MotherClinic)
+                    // Set the adapter for the RecyclerView
+                    clinicRecyclerView.adapter = MotherClinicAdapter(clinicArrayList, this@MotherClinic)
+
+                    // Update visibility of clinic list and loader layout
                     binding.clinicList.visibility = View.VISIBLE
                     binding.loaderLayout.visibility = View.GONE
                 }
             }
-            override fun onCancelled(error: DatabaseError) {
 
+            override fun onCancelled(error: DatabaseError) {
+                // Handle database error if needed
             }
         })
     }
 
     fun onItemClick(position: Int) {
-        var intent = Intent(this,ViewMotherClinic::class.java).also {
-            it.putExtra("clinicId",clinicArrayList[position].clinicId.toString())
+        // Handle item click if needed, e.g., navigate to a detailed view
+        var intent = Intent(this, ViewMotherClinic::class.java).also {
+            it.putExtra("clinicId", clinicArrayList[position].clinicId.toString())
         }
         startActivity(intent)
     }

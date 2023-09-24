@@ -16,8 +16,8 @@ import com.google.firebase.database.ValueEventListener
 
 class MotherUpcomingClinic : AppCompatActivity() {
 
-    private lateinit var binding:ActivityMotherUpcomingClinicBinding
-    private lateinit var user:FirebaseAuth
+    private lateinit var binding: ActivityMotherUpcomingClinicBinding
+    private lateinit var user: FirebaseAuth
 
     private lateinit var clinicArrayList : ArrayList<MotherClinicItem>
     private lateinit var clinicRecyclerView : RecyclerView
@@ -30,6 +30,7 @@ class MotherUpcomingClinic : AppCompatActivity() {
 
         var pregnancyId = intent.getStringExtra("pregnancyId")
 
+        // Button to navigate to completed clinics
         binding.btnCompleted.setOnClickListener{
             var intent = Intent(this,MotherClinic::class.java).also {
                 it.putExtra("pregnancyId",pregnancyId.toString())
@@ -51,6 +52,7 @@ class MotherUpcomingClinic : AppCompatActivity() {
         binding.clinicList.visibility = View.GONE
         binding.loaderLayout.visibility = View.VISIBLE
 
+        // Read data from Firebase Realtime Database
         FirebaseDatabase.getInstance().getReference("MotherClinic").addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -59,6 +61,7 @@ class MotherUpcomingClinic : AppCompatActivity() {
                         if(fineSnapshot.child("pregnancyId").value.toString() == pregnancyId){
                             val clinicItem =  fineSnapshot.getValue(MotherClinicItem::class.java)
                             if (clinicItem != null) {
+                                // Check if clinic status is pending
                                 if(clinicItem.status.toString() == "pending"){
                                     clinicArrayList.add(clinicItem!!)
                                 }
@@ -77,6 +80,6 @@ class MotherUpcomingClinic : AppCompatActivity() {
     }
 
     fun onItemClick(position: Int) {
-
+        // Handle item click events if needed
     }
 }

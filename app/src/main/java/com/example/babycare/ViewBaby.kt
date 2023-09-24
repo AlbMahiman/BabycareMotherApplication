@@ -7,55 +7,73 @@ import android.view.View
 import com.example.babycare.databinding.ActivityViewBabyBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.ktx.Firebase
+
+// This is the ViewBaby activity, which displays information about a baby.
 
 class ViewBaby : AppCompatActivity() {
-    private lateinit var binding:ActivityViewBabyBinding
-    private lateinit var user:FirebaseAuth
+    private lateinit var binding: ActivityViewBabyBinding
+    private lateinit var user: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Initialize the activity layout and Firebase Authentication.
         binding = ActivityViewBabyBinding.inflate(layoutInflater)
         user = FirebaseAuth.getInstance()
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        // Get the baby ID passed from the previous activity.
         val babyId = intent.getStringExtra("babyId")
+
+        // Load data for the baby.
         readData(babyId.toString())
 
-        binding.bmi.setOnClickListener{
-            var intent = Intent(this,BabyBmi::class.java).also {
-                it.putExtra("babyId",babyId.toString())
+        // Set up click listeners for various actions.
+        binding.bmi.setOnClickListener {
+            val intent = Intent(this, BabyBmi::class.java).also {
+                it.putExtra("babyId", babyId.toString())
             }
             startActivity(intent)
         }
-        binding.med.setOnClickListener{
-            var intent = Intent(this,BabyMed::class.java).also {
-                it.putExtra("babyId",babyId.toString())
+
+        binding.med.setOnClickListener {
+            val intent = Intent(this, BabyMed::class.java).also {
+                it.putExtra("babyId", babyId.toString())
             }
             startActivity(intent)
         }
-        binding.course.setOnClickListener{
-            var intent = Intent(this,BabyCourses::class.java).also {
-                it.putExtra("babyId",babyId.toString())
+
+        binding.course.setOnClickListener {
+            val intent = Intent(this, BabyCourses::class.java).also {
+                it.putExtra("babyId", babyId.toString())
             }
             startActivity(intent)
         }
-        binding.clinic.setOnClickListener{
-            var intent = Intent(this,BabyClinic::class.java).also {
-                it.putExtra("babyId",babyId.toString())
+
+        binding.clinic.setOnClickListener {
+            val intent = Intent(this, BabyClinic::class.java).also {
+                it.putExtra("babyId", babyId.toString())
             }
             startActivity(intent)
         }
     }
 
-    private fun readData(babyId:String){
+    private fun readData(babyId: String) {
+        // Hide data layout and show loading spinner.
         binding.dataLayout.visibility = View.GONE
         binding.loaderLayout.visibility = View.VISIBLE
-        FirebaseDatabase.getInstance().getReference("Baby").child(babyId).get().addOnSuccessListener {
-            if(it.exists()){
-                binding.fullName.text = it.child("fullName").value.toString()
-                binding.dob.text = it.child("dob").value.toString()
-                binding.dataLayout.visibility = View.VISIBLE
-                binding.loaderLayout.visibility = View.GONE
+
+        // Read baby information from the Firebase Realtime Database.
+        FirebaseDatabase.getInstance().getReference("Baby").child(babyId).get()
+            .addOnSuccessListener {
+                if (it.exists()) {
+                    // Populate the UI with baby information.
+                    binding.fullName.text = it.child("fullName").value.toString()
+                    binding.dob.text = it.child("dob").value.toString()
+
+                    // Show data layout and hide loading spinner.
+                    binding.dataLayout.visibility = View.VISIBLE
+                    binding.loaderLayout.visibility = View.GONE
+                }
             }
-        }
     }
 }

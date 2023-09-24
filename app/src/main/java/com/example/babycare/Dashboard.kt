@@ -10,63 +10,68 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 
 class Dashboard : AppCompatActivity() {
-    private lateinit var binding:ActivityDashboardBinding
-    private lateinit var user:FirebaseAuth
+    private lateinit var binding: ActivityDashboardBinding
+    private lateinit var user: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Initialize the layout binding and Firebase authentication
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         user = FirebaseAuth.getInstance()
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Read data from Firebase
         readData()
 
-        binding.pragnancyLayout.setOnClickListener{
-            val intent = Intent(this,Pregnancies::class.java)
+        // Set click listeners for various buttons
+        binding.pragnancyLayout.setOnClickListener {
+            val intent = Intent(this, Pregnancies::class.java)
             startActivity(intent)
         }
-        binding.babyLayout.setOnClickListener{
-            val intent = Intent(this,Babies::class.java)
+        binding.babyLayout.setOnClickListener {
+            val intent = Intent(this, Babies::class.java)
             startActivity(intent)
         }
-        binding.qrLayout.setOnClickListener{
-            val intent = Intent(this,Qr::class.java)
+        binding.qrLayout.setOnClickListener {
+            val intent = Intent(this, Qr::class.java)
             startActivity(intent)
         }
-        binding.contact.setOnClickListener{
+        binding.contact.setOnClickListener {
+            // Sign out the user and redirect to the login activity
             user.signOut()
-            // Redirect the user to the login activity or another appropriate destination
             val intent = Intent(this, Login::class.java)
             startActivity(intent)
             finish()
         }
-        binding.chat.setOnClickListener{
-            val intent = Intent(this,Chat::class.java)
+        binding.chat.setOnClickListener {
+            val intent = Intent(this, Chat::class.java)
             startActivity(intent)
         }
-
     }
 
-    private fun readData(){
-
+    private fun readData() {
+        // Show loading indicator while fetching data
         binding.loaderLayout.visibility = View.VISIBLE
         binding.dataLayout.visibility = View.GONE
 
+        // Read data from the Firebase Realtime Database
         FirebaseDatabase.getInstance().getReference("Mother").child(user.uid.toString()).get().addOnSuccessListener {
-            if(it.exists()){
-
+            if (it.exists()) {
+                // Populate user interface elements with retrieved data
                 binding.topName.text = it.child("motherName").value.toString()
                 binding.fullName.text = it.child("motherFullName").value.toString()
                 binding.email.text = it.child("email").value.toString()
                 binding.address.text = it.child("address").value.toString()
 
+                // Hide loading indicator and show data layout
                 binding.loaderLayout.visibility = View.GONE
                 binding.dataLayout.visibility = View.VISIBLE
-            }else{
-                val intent = Intent(this,Login::class.java)
+            } else {
+                // If user data doesn't exist, redirect to the login activity
+                val intent = Intent(this, Login::class.java)
                 startActivity(intent)
                 finish()
             }
         }
     }
-
 }
